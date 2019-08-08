@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:simple="http://www.simple-rpc.com/schema/simple-reference"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.simple-rpc.com/schema/simple-reference http://www.simple-rpc.com/schema/simple-reference.xsd">
+
+    <!--引入远程服务-->
+    <simple:reference id="sayService"
+                          interface="com.simple.rpc.framework.test.service.SayService"
+                          clusterStrategy="WeightRandom"
+                          timeout="2000"/>
+
+    <simple:reference id="multiService"
+                          interface="com.simple.rpc.framework.test.service.MultiService"
+                          clusterStrategy="WeightRandom"
+                          timeout="2000"/>
+</beans>

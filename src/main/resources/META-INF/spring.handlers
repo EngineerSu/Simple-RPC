@@ -1,0 +1,2 @@
+http\://www.simple-rpc.com/schema/simple-service=com.simple.rpc.framework.spring.handler.RpcServiceNamespaceHandler
+http\://www.simple-rpc.com/schema/simple-reference=com.simple.rpc.framework.spring.handler.RpcReferenceNamespaceHandler

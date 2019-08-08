@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:simple="http://www.simple-rpc.com/schema/simple-service"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.simple-rpc.com/schema/simple-service http://www.simple-rpc.com/schema/simple-service.xsd">
+
+    <!--发布远程服务-->
+    <bean id="sayService1" class="com.simple.rpc.framework.test.service.impl.SayServiceImpl1"/>
+    <simple:service id="sayServiceRegister1"
+                        interface="com.simple.rpc.framework.test.service.SayService"
+                        ref="sayService1"
+                        weight="50"
+                        workerThreads="100"
+                        serverPort="8083"
+                        timeout="2000"/>
+
+    <bean id="sayService2" class="com.simple.rpc.framework.test.service.impl.SayServiceImpl2"/>
+    <simple:service id="seeServiceRegister2"
+                        interface="com.simple.rpc.framework.test.service.SayService"
+                        ref="sayService2"
+                        weight="100"
+                        workerThreads="100"
+                        serverPort="8081"
+                        timeout="2000"/>
+
+    <bean id="multiService" class="com.simple.rpc.framework.test.service.impl.MultiServiceImpl"/>
+    <simple:service id="multiServiceRegister"
+                  interface="com.simple.rpc.framework.test.service.MultiService"
+                  ref="multiService"
+                  weight="50"
+                  workerThreads="100"
+                  serverPort="8082"
+                  timeout="2000"/>
+
+</beans>
