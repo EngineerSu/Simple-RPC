@@ -3,6 +3,8 @@
 
 VX: sicor1994
 
+
+
 ## 食用说明
 
 本Simple-RPC项目框架主要参考《架构探险：从零开始写分布式服务框架》的项目源码，自己做了很多自定义化的修改、改进和增强。
@@ -55,7 +57,7 @@ Simple-RPC并没有达到商用的标准，但是作为一个学习参考项目�
 
 简单介绍如何将本项目在你的电脑上RUN起来
 
-1. 下载[zookeeper](https://note.youdao.com/ynoteshare1/index.html?id=65dd9de0a5ad1a2b2858d4295d523e22&type=note)，参考[这里](https://www.jianshu.com/p/fb190c6d9768)将zookeeper在你的windows上运行起来，注意使用zookeeper时不要关闭CMD窗口
+1. 下载[zookeeper](https://note.youdao.com/ynoteshare1/index.html?id=65dd9de0a5ad1a2b2858d4295d523e22&type=note)，参考[这里](https://www.jianshu.com/p/fb190c6d9768)在你的windows上安装并运行zookeeper，注意使用zookeeper时不要关闭CMD窗口
 
 2. clone本项目到本地，使用IDEA打开(没试过Eclipse导入本项目，不建议使用)，配置maven和本地仓库，等待依赖自动导入完成（不会使用maven？Google/Baidu可以帮助你）
 
@@ -73,11 +75,34 @@ Simple-RPC并没有达到商用的标准，但是作为一个学习参考项目�
 
 #### simple-rpc.properties
 
-它是全局配置文件，配置了ZK地址和参数、默认负载均衡策略、采用的序列化协议等，具体可以参考该文件中的注释说明。除了以下情况的必须配置项，其他配置都有缺省值
+它是全局配置文件，配置了ZK地址和参数、默认负载均衡策略、采用的序列化协议等，具体可以参考该文件中的注释说明。除了以下情况必须配置的参数项，其他配置项都支持缺省配置
 
 - simple.rpc.zookeeper.address代表的ZK地址必须配置
-- 发布服务时, 如果存在没有配置appName属性的标签, 那么simple.rpc.server.app.name必须配置
-- 引用服务时, 如果存在没有配置appName属性的标签, 那么simple.rpc.client.app.name必须配置
+- 发布服务时, 如果存在没有配置appName属性的simple:service标签, 那么simple.rpc.server.app.name必须配置
+- 引用服务时, 如果存在没有配置appName属性的simple:reference标签, 那么simple.rpc.client.app.name必须配置
+
+```properties
+# 注册中心ZK地址,必须配置,没有默认值
+simple.rpc.zookeeper.address=localhost:2181
+# session超时时间,默认500
+simple.rpc.zookeeper.session.timeout=3000
+# 连接超时时间,默认500
+simple.rpc.zookeeper.connection.timeout=3000
+# 负载均衡默认策略可选值: Random / WeightRandom / Polling / WeightPolling / Hash. 如果配置错误,则使用Random策略
+simple.rpc.client.clusterStrategy.default=WeightRandom
+# 客户端对每个主机的初始化Channel数量,默认:10
+simple.rpc.client.channelPoolSize=10
+# 客户端调用RPC服务线程池的线程数,默认:10
+simple.rpc.client.threadWorkers=10
+# 发布服务时的默认命名空间(标签没有配置appName属性时采用)
+simple.rpc.server.app.name=test
+# 引入服务时的默认命名空间(标签没有配置appName属性时采用)
+simple.rpc.client.app.name=test
+# 服务端序列化协议,默认:Default.可选值:Default(ProtoStuff) / Hessian
+simple.rpc.server.serializer=Default
+# 客户端序列化协议,默认:Default.可选值:Default(ProtoStuff) / Hessian
+simple.rpc.client.serializer=Default
+```
 
 #### rpc-service.xml
 
@@ -143,7 +168,7 @@ Simple-RPC并没有达到商用的标准，但是作为一个学习参考项目�
 
 作为依赖在新项目中使用时，必须提供配置文件：simple-rpc.properties / rpc-service.xml / rpc-reference.xml， 且它们都要放在 /resource 根目录下，然后创建自己的接口和实现类，并按要求码配置标签即可使用。（和Dubbo的使用要求是类似的）
 
-偷个懒：直接将原项目 com.simple.rpc.framework.test 包中内容 和 /resources 下的配置文件都copy到新项目中，即可测试使用。
+你也可以选择偷懒：直接将原项目 com.simple.rpc.framework.test 包中内容 和 /resources 下的配置文件都copy到新项目中，即可测试使用。
 
 
 
