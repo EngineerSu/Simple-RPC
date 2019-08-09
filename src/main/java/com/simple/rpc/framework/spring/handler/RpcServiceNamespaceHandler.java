@@ -4,9 +4,10 @@ import com.simple.rpc.framework.spring.parser.RpcServiceBeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 /**
- * 服务发布自定义标签
+ * 服务引入自定义标签:声明simple:service标签解析类
  *
- * @author 11102342 suchang 2019/07/03
+ * @author jacksu
+ * @date 2018/8/8
  */
 public class RpcServiceNamespaceHandler extends NamespaceHandlerSupport {
     @Override

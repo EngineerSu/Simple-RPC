@@ -7,12 +7,16 @@
 
     <!--引入远程服务-->
     <simple:reference id="sayService"
-                          interface="com.simple.rpc.framework.test.service.SayService"
-                          clusterStrategy="WeightRandom"
-                          timeout="2000"/>
-
+                      appName="simple"
+                      interface="com.simple.rpc.framework.test.service.SayService"
+                      clusterStrategy="WeightRandom"
+                      timeout="2000"
+                      groupName="default"/>
+    <!--同一台主机支持引入多个RPC服务-->
     <simple:reference id="multiService"
-                          interface="com.simple.rpc.framework.test.service.MultiService"
-                          clusterStrategy="WeightRandom"
-                          timeout="2000"/>
+                      appName="simple"
+                      interface="com.simple.rpc.framework.test.service.MultiService"
+                      clusterStrategy="WeightRandom"
+                      timeout="2000"
+                      groupName="default"/>
 </beans>

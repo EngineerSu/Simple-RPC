@@ -7,13 +7,14 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * 配置导入类
+ * simple-rpc.properties配置导入类
  *
- * @author 11102342 suchang 2019/07/04
+ * @author jacksu
+ * @date 2018/8/8
  */
 public class PropertyConfigHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(PropertyConfigHelper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyConfigHelper.class);
 
     private static final String PROPERTY_CLASSPATH = "/simple-rpc.properties";
     private static final Properties properties = new Properties();
@@ -55,19 +56,19 @@ public class PropertyConfigHelper {
             }
             properties.load(is);
 
-            zkService = properties.getProperty("vivo.rpc.zookeeper.address");
-            appName4Server = properties.getProperty("vivo.rpc.server.app.name");
-            appName4Client = properties.getProperty("vivo.rpc.client.app.name");
-            zkSessionTimeout = Integer.parseInt(properties.getProperty("vivo.rpc.zookeeper.session.timeout", "500"));
-            zkConnectionTimeout = Integer.parseInt(properties.getProperty("vivo.rpc.zookeeper.connection.timeout", "500"));
-            channelPoolSize = Integer.parseInt(properties.getProperty("vivo.rpc.client.channelPoolSize", "10"));
-            threadWorkerNumber = Integer.parseInt(properties.getProperty("vivo.rpc.client.threadWorkers", "10"));
-            defaultClusterStrategy = properties.getProperty("vivo.rpc.client.clusterStrategy.default", "random");
-            serverSerializer = properties.getProperty("vivo.rpc.server.serializer", "Default");
-            clientSerializer = properties.getProperty("vivo.rpc.client.serializer", "Default");
+            zkService = properties.getProperty("simple.rpc.zookeeper.address");
+            appName4Server = properties.getProperty("simple.rpc.server.app.name");
+            appName4Client = properties.getProperty("simple.rpc.client.app.name");
+            zkSessionTimeout = Integer.parseInt(properties.getProperty("simple.rpc.zookeeper.session.timeout", "500"));
+            zkConnectionTimeout = Integer.parseInt(properties.getProperty("simple.rpc.zookeeper.connection.timeout", "500"));
+            channelPoolSize = Integer.parseInt(properties.getProperty("simple.rpc.client.channelPoolSize", "10"));
+            threadWorkerNumber = Integer.parseInt(properties.getProperty("simple.rpc.client.threadWorkers", "10"));
+            defaultClusterStrategy = properties.getProperty("simple.rpc.client.clusterStrategy.default", "random");
+            serverSerializer = properties.getProperty("simple.rpc.server.serializer", "Default");
+            clientSerializer = properties.getProperty("simple.rpc.client.serializer", "Default");
 
         } catch (Throwable t) {
-            logger.warn("load ares_remoting's properties file failed.", t);
+            LOGGER.warn("load ares_remoting's properties file failed.", t);
             throw new RuntimeException(t);
         } finally {
             if (null != is) {
@@ -81,7 +82,7 @@ public class PropertyConfigHelper {
     }
 
     public static Logger getLogger() {
-        return logger;
+        return LOGGER;
     }
 
     public static String getZkService() {

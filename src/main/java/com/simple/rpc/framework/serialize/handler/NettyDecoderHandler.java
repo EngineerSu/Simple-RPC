@@ -11,18 +11,23 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 /**
- * 解码器Handler:采用的反序列化协议在消息头部的第一个int中
+ * 解码器Handler
  *
- * @author 11102342 suchang 2019/07/05
+ * @author jacksu
+ * @date 2018/8/8
  */
 public class NettyDecoderHandler extends ByteToMessageDecoder {
 
-    private static final Logger logger = LoggerFactory.getLogger(NettyDecoderHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyDecoderHandler.class);
 
-    // 解码对象class
+    /**
+     * 解码类的Class对象
+     */
     private Class<?> genericClass;
 
-    // 只提供此构造方法:必须指定反解码的类型
+    /**
+     * 只提供此构造方法:必须指定反解码的类型
+     */
     public NettyDecoderHandler(Class<?> genericClass) {
         this.genericClass = genericClass;
     }
@@ -54,7 +59,7 @@ public class NettyDecoderHandler extends ByteToMessageDecoder {
         Object obj = SerializerEngine.deserialize(data, genericClass, serializerType);
         out.add(obj);
         time = System.currentTimeMillis() - time;
-        logger.info("[{}]协议解码耗时{}ms", serializerType, time);
+        LOGGER.info("[{}]协议解码耗时{}ms", serializerType, time);
     }
 
 }

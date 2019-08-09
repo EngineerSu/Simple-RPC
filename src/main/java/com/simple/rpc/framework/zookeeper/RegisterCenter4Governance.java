@@ -8,8 +8,8 @@ import java.util.Map;
 /**
  * 服务治理接口
  *
- * @author liyebing created on 17/4/26.
- * @version $Id$
+ * @author jacksu
+ * @date 2018/8/8
  */
 public interface RegisterCenter4Governance {
 

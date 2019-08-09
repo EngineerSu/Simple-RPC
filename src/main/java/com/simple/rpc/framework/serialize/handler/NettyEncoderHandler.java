@@ -9,13 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 编码器Handler:序列化协议根据配置文件决定
+ * 编码器Handler(自定义协议:int(序列化协议信息) + int(data长度信息) + data(待传递的数据))
  *
- * @author 11102342 suchang 2019/07/05
+ * @author jacksu
+ * @date 2018/8/8
  */
 public class NettyEncoderHandler extends MessageToByteEncoder {
 
-    private static final Logger logger = LoggerFactory.getLogger(NettyDecoderHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyDecoderHandler.class);
+
     private String serializerType;
 
     /**
@@ -38,14 +40,7 @@ public class NettyEncoderHandler extends MessageToByteEncoder {
         // 最后才写入序列化后得到的字节数组
         out.writeBytes(data);
         time = System.currentTimeMillis() - time;
-        logger.info("[{}]协议编码耗时{}ms", SerializerType.getValidType(serializerType), time);
+        LOGGER.info("[{}]协议编码耗时{}ms", SerializerType.getValidType(serializerType), time);
     }
 
-    public String getSerializerType() {
-        return serializerType;
-    }
-
-    public void setSerializerType(String serializerType) {
-        this.serializerType = serializerType;
-    }
 }

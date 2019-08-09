@@ -3,8 +3,6 @@ package com.simple.rpc.framework.serialize.serializer;
 
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,16 +10,16 @@ import java.io.ByteArrayOutputStream;
 /**
  * Hessian序列化协议:要求所有参与序列化的类必须实现Serializable接口
  *
- * @author 11102342 suchang 2019/07/05
+ * @author jacksu
+ * @date 2018/8/8
  */
-public class HessianSerializer implements Serializer{
-    private static final Logger logger = LoggerFactory.getLogger(HessianSerializer.class);
+public class HessianSerializer implements Serializer {
 
     @Override
     public byte[] serialize(Object obj) {
-        if (null == obj)
+        if (null == obj) {
             throw new NullPointerException();
-
+        }
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             HessianOutput ho = new HessianOutput(os);
@@ -34,9 +32,9 @@ public class HessianSerializer implements Serializer{
 
     @Override
     public <T> T deserialize(byte[] data, Class<T> clazz) {
-        if (null == data)
+        if (null == data) {
             throw new NullPointerException();
-
+        }
         try {
             ByteArrayInputStream is = new ByteArrayInputStream(data);
             HessianInput hi = new HessianInput(is);
@@ -46,6 +44,4 @@ public class HessianSerializer implements Serializer{
         }
 
     }
-
-
 }

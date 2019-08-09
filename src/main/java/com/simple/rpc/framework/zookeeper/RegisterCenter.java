@@ -4,10 +4,10 @@ package com.simple.rpc.framework.zookeeper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.simple.rpc.framework.zookeeper.message.InvokerRegisterMessage;
-import com.simple.rpc.framework.zookeeper.message.ProviderRegisterMessage;
 import com.simple.rpc.framework.utils.JacksonUtils;
 import com.simple.rpc.framework.utils.PropertyConfigHelper;
+import com.simple.rpc.framework.zookeeper.message.InvokerRegisterMessage;
+import com.simple.rpc.framework.zookeeper.message.ProviderRegisterMessage;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.serialize.SerializableSerializer;
@@ -19,74 +19,81 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 /**
  * 注册中心实现
  *
- * @author suchang created on 2019/06/28
+ * @author jacksu
+ * @date 2018/8/8
  */
 public class RegisterCenter implements RegisterCenter4Provider, RegisterCenter4Invoker, RegisterCenter4Governance {
 
-    private static final Logger logger = LoggerFactory.getLogger(RegisterCenter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RegisterCenter.class);
 
-    private static RegisterCenter instance = new RegisterCenter(); // 单例模式,懒汉模式
+    /**
+     * 饿汉单例模式
+     */
+    private static final RegisterCenter INSTANCE = new RegisterCenter();
 
-    // provider列表,Key:服务提供者接口的全限定名,value:服务提供者注册信息列表
-    private static final Map<String, List<ProviderRegisterMessage>> providerMap = Maps.newConcurrentMap();
+    /**
+     * 缓存的服务地址列表:key:服务提供者所属应用名+接口的全限定名,value:服务提供者注册的信息列表
+     */
+    private static final Map<String, List<ProviderRegisterMessage>> PROVIDER_MAP = Maps.newConcurrentMap();
 
-    // invkoer列表,key:服务提供者接口的全限定名,value:服务使用者信息列表(服务治理,先不做)
-    private static final Map<String, List<InvokerRegisterMessage>> invokerMap = Maps.newConcurrentMap();
+    /**
+     * 缓存的服务调用者列表:key:服务提供者所属应用名+接口的全限定名,value:服务使用者(invoker)信息列表
+     */
+    private static final Map<String, List<InvokerRegisterMessage>> INVOKER_MAP = Maps.newConcurrentMap();
 
-    // invoker节点的监听器Set,避免重复添加监听器
-    private static final Set<String> invokerNodeListenerSet = Sets.newConcurrentHashSet();
+    /**
+     * invoker节点的监听器Set,避免重复添加监听器
+     */
+    private static Set<String> invokerNodeListenerSet = Sets.newConcurrentHashSet();
 
-    private static String ZK_SERVICE = PropertyConfigHelper.getZkService();
-    private static int ZK_SESSION_TIME_OUT = PropertyConfigHelper.getZkSessionTimeout();
-    private static int ZK_CONNECTION_TIME_OUT = PropertyConfigHelper.getZkConnectionTimeout();
-    // 规定所有应用节点都在ROOT_PATH节点下
-    private static String ROOT_PATH = "/com/simple/rpc/framework/zookeeper/vivorpc";
-    public static String PROVIDER_TYPE = "com/simple/rpc/framework/provider";
-    public static String INVOKER_TYPE = "com/simple/rpc/framework/invoker";
-    private static volatile ZkClient zkClient = null; // 单例模式,饿汉模式
+    /**
+     * ZK地址
+     */
+    private static final String ZK_SERVICE = PropertyConfigHelper.getZkService();
+    /**
+     * ZK连接session超时时间
+     */
+    private static final int ZK_SESSION_TIME_OUT = PropertyConfigHelper.getZkSessionTimeout();
+    /**
+     * ZK连接超时时间
+     */
+    private static final int ZK_CONNECTION_TIME_OUT = PropertyConfigHelper.getZkConnectionTimeout();
+    /**
+     * 注册服务使用的根节点
+     */
+    private static final String ROOT_PATH = "/zookeeper/simple-rpc";
+    /**
+     * 每个服务下表示服务提供者的父节点名
+     */
+    private static final String PROVIDER_TYPE = "provider";
+    /**
+     * 每个服务下表示服务使用者的父节点名
+     */
+    private static final String INVOKER_TYPE = "invoker";
+
+    /**
+     * ZK客户端
+     */
+    private static final ZkClient zkClient = new ZkClient(ZK_SERVICE, ZK_SESSION_TIME_OUT, ZK_CONNECTION_TIME_OUT, new SerializableSerializer());
 
     private RegisterCenter() {
     }
 
     public static RegisterCenter getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     /**
-     * 注册ROOT_PATH路径
+     * 注册根路径
      */
     static {
-        // 发起zookeeper连接
-        if (null == zkClient) {
-            zkClient = new ZkClient(ZK_SERVICE, ZK_SESSION_TIME_OUT, ZK_CONNECTION_TIME_OUT, new SerializableSerializer());
-        }
-        // 注册根路径
         boolean exist = zkClient.exists(ROOT_PATH);
         if (!exist) {
             zkClient.createPersistent(ROOT_PATH, true);
         }
-    }
-
-    // 批量注册服务,标签初始化是单个服务注册,所以这个方法在本项目中暂时没用到
-    @Override
-    public void initProviders(List<ProviderRegisterMessage> providerRegisterMessages) {
-        long startTime = System.currentTimeMillis();
-        if (null == providerRegisterMessages || providerRegisterMessages.size() == 0) {
-            return;
-        }
-
-        // 防止多次注册,需要锁(内部实际注册时,还有锁,双重锁)
-        synchronized (RegisterCenter.class) {
-            for (ProviderRegisterMessage provider : providerRegisterMessages) {
-                registerProvider(provider);
-            }
-        }
-        long times = System.currentTimeMillis() - startTime;
-        logger.info("向zookeeper中批量注册服务成功,耗时{}ms", times);
     }
 
     /**
@@ -123,8 +130,8 @@ public class RegisterCenter implements RegisterCenter4Provider, RegisterCenter4I
                     public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
                         // 服务接口的全限定名
                         if (null == currentChilds || currentChilds.size() == 0) {
-                            invokerMap.remove(nameSpace);
-                            logger.warn("[{}]节点发生变化,该服务节点下已无调用者", parentPath);
+                            INVOKER_MAP.remove(nameSpace);
+                            LOGGER.warn("[{}]节点发生变化,该服务节点下已无调用者", parentPath);
                             return;
                         }
                         // 监听到变化后invokerPath节点下的所有临时节点值是currentChilds
@@ -133,33 +140,17 @@ public class RegisterCenter implements RegisterCenter4Provider, RegisterCenter4I
                         for (String each : currentChilds) {
                             newInvokerList.add(JacksonUtils.jsonToObject(each, InvokerRegisterMessage.class));
                         }
-
                         // 更新invoker缓存
-                        invokerMap.put(nameSpace, newInvokerList);
-                        logger.info("[{}]节点发生变化,重新加载该节点下的invoker信息如下", parentPath);
+                        INVOKER_MAP.put(nameSpace, newInvokerList);
+                        LOGGER.info("[{}]节点发生变化,重新加载该节点下的invoker信息如下", parentPath);
                         System.out.println(newInvokerList);
                     }
                 });
             }
         }
         long times = System.currentTimeMillis() - startTime;
-        logger.info("注册服务耗时{}ms [服务路径:/zookeeper/{}/{}]", times, nameSpace, provider.getServiceImplPath());
+        LOGGER.info("注册服务耗时{}ms [服务路径:/zookeeper/{}/{}]", times, nameSpace, provider.getServiceImplPath());
     }
-
-    // 批量注册invoker,标签初始化是单个invoker注册,所以这个方法在本项目中暂时没用到
-    @Override
-    public void initInvokers(List<InvokerRegisterMessage> invokerRegisterMessages) {
-        long startTime = System.currentTimeMillis();
-        //连接zk
-        synchronized (RegisterCenter.class) {
-            for (InvokerRegisterMessage invoker : invokerRegisterMessages) {
-                registerInvoker(invoker);
-            }
-        }
-        long times = System.currentTimeMillis() - startTime;
-        logger.info("从zookeeper中批量获取接口服务地址成功,耗时{}ms", times);
-    }
-
 
     /**
      * 注册单个invoker
@@ -188,15 +179,15 @@ public class RegisterCenter implements RegisterCenter4Provider, RegisterCenter4I
             String servicePath = ROOT_PATH + "/" + nameSpace + "/" + PROVIDER_TYPE;
             // 本地缓存没有这个接口key,表明该接口是第一次添加引用声明,此时需要为该接口添加一个监听器
             // 不过接口引用声明一般也只会出现一次
-            if (null == providerMap.get(nameSpace)) {
+            if (null == PROVIDER_MAP.get(nameSpace)) {
                 // 为每个服务注册监听器,实现服务自动发现
                 zkClient.subscribeChildChanges(servicePath, new IZkChildListener() {
                     @Override
                     public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
                         // 服务接口的全限定名
                         if (null == currentChilds || currentChilds.size() == 0) {
-                            providerMap.remove(nameSpace);
-                            logger.warn("[{}]节点发生变化,该节点下已无可用服务", parentPath);
+                            PROVIDER_MAP.remove(nameSpace);
+                            LOGGER.warn("[{}]节点发生变化,该节点下已无可用服务", parentPath);
                             return;
                         }
                         // 监听到变化后servicePath节点下的所有临时节点值是currentChilds
@@ -205,8 +196,8 @@ public class RegisterCenter implements RegisterCenter4Provider, RegisterCenter4I
                             newProviderList.add(JacksonUtils.jsonToObject(each, ProviderRegisterMessage.class));
                         }
                         // 更新本地缓存的服务信息
-                        providerMap.put(nameSpace, newProviderList);
-                        logger.info("[{}]节点发生变化,重新加载该节点下的服务信息如下", parentPath);
+                        PROVIDER_MAP.put(nameSpace, newProviderList);
+                        LOGGER.info("[{}]节点发生变化,重新加载该节点下的服务信息如下", parentPath);
                         System.out.println(newProviderList);
                     }
                 });
@@ -219,21 +210,21 @@ public class RegisterCenter implements RegisterCenter4Provider, RegisterCenter4I
                 providerRegisterMessages.add(JacksonUtils.jsonToObject(each, ProviderRegisterMessage.class));
             }
             // 将注册信息缓存到本地
-            providerMap.put(nameSpace, providerRegisterMessages);
+            PROVIDER_MAP.put(nameSpace, providerRegisterMessages);
         }
         long times = System.currentTimeMillis() - startTime;
-        logger.info("获取服务地址耗时{}ms:[{}]", times, nameSpace);
+        LOGGER.info("获取服务地址耗时{}ms:[{}]", times, nameSpace);
         return providerRegisterMessages;
     }
 
     @Override
     public Map<String, List<ProviderRegisterMessage>> getProviderMap() {
-        return providerMap;
+        return PROVIDER_MAP;
     }
 
     @Override
     public Map<String, List<InvokerRegisterMessage>> getInvokersOfProvider() {
-        return invokerMap;
+        return INVOKER_MAP;
     }
 
     @Override
@@ -242,14 +233,14 @@ public class RegisterCenter implements RegisterCenter4Provider, RegisterCenter4I
         // 获取所有的服务接口节点
         List<String> apps = zkClient.getChildren(ROOT_PATH);
         for (String eachApp : apps) {
-            logger.info("正在遍历的应用名称是:[{}]", eachApp);
+            LOGGER.info("正在遍历的应用名称是:[{}]", eachApp);
             List<String> services = zkClient.getChildren(ROOT_PATH + "/" + eachApp);
             for (String eachService : services) {
-                logger.info("正在遍历的服务名称是:[{}]", eachService);
+                LOGGER.info("正在遍历的服务名称是:[{}]", eachService);
                 String nameSpace = eachApp + "/" + eachService;
                 List<String> invokers = zkClient.getChildren(ROOT_PATH + "/" + nameSpace + "/" + INVOKER_TYPE);
                 for (String eachInvoker : invokers) {
-                    logger.info("遍历调用者一次");
+                    LOGGER.info("遍历调用者一次");
                     String machineID4Server = JacksonUtils.jsonToObject(eachInvoker, InvokerRegisterMessage.class).getInvokerMachineID4Server();
                     List<String> list = map.get(machineID4Server);
                     if (null == list) {

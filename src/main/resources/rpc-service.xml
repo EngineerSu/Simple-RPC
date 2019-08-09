@@ -8,29 +8,35 @@
     <!--发布远程服务-->
     <bean id="sayService1" class="com.simple.rpc.framework.test.service.impl.SayServiceImpl1"/>
     <simple:service id="sayServiceRegister1"
-                        interface="com.simple.rpc.framework.test.service.SayService"
-                        ref="sayService1"
-                        weight="50"
-                        workerThreads="100"
-                        serverPort="8083"
-                        timeout="2000"/>
-
+                    interface="com.simple.rpc.framework.test.service.SayService"
+                    ref="sayService1"
+                    weight="50"
+                    workerThreads="100"
+                    serverPort="8083"
+                    timeout="2000"
+                    appName="simple"
+                    groupName="default"/>
+    <!--同一个主机支持对同一个接口发布多个服务实现类-->
     <bean id="sayService2" class="com.simple.rpc.framework.test.service.impl.SayServiceImpl2"/>
     <simple:service id="seeServiceRegister2"
-                        interface="com.simple.rpc.framework.test.service.SayService"
-                        ref="sayService2"
-                        weight="100"
-                        workerThreads="100"
-                        serverPort="8081"
-                        timeout="2000"/>
-
+                    interface="com.simple.rpc.framework.test.service.SayService"
+                    ref="sayService2"
+                    weight="100"
+                    workerThreads="100"
+                    serverPort="8081"
+                    timeout="2000"
+                    appName="simple"
+                    groupName="default"/>
+    <!--同一个主机支持发布多个接口的服务-->
     <bean id="multiService" class="com.simple.rpc.framework.test.service.impl.MultiServiceImpl"/>
     <simple:service id="multiServiceRegister"
-                  interface="com.simple.rpc.framework.test.service.MultiService"
-                  ref="multiService"
-                  weight="50"
-                  workerThreads="100"
-                  serverPort="8082"
-                  timeout="2000"/>
+                    interface="com.simple.rpc.framework.test.service.MultiService"
+                    ref="multiService"
+                    weight="50"
+                    workerThreads="100"
+                    serverPort="8082"
+                    timeout="2000"
+                    appName="simple"
+                    groupName="default"/>
 
 </beans>
