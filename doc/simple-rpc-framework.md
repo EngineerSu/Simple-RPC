@@ -1,25 +1,44 @@
-## rpc框架
+## Simple-RPC简介
 
-### 整体框架特点
+### 什么是RPC
 
-### 服务端启动流程
+RPC(Remote Procedure Call, 远程过程调用), 其目的是让使用者调用远程服务时, 感觉和调用本地服务是一样的效果.
 
+回顾一下我们是怎么调用本地服务的? 首先, 创建一个接口, 然后写一个接口实现类, 然后在Spring中注册这个接口实现类的Bean, 最后要使用时, 我们一般使用如下形式即可:
+
+```java
+@Autowired
+SayService sayService;
 ```
-1.读取配置文件,获取所有rpc服务声明
-2.向zk中注册服务
-3.开启服务代理server
-后续:接收了客户端的请求,按请求调用实际执行类,返回结果
-```
 
-### 客户端启动流程
+而在现实开发中, 我们只会负责一部分接口开发, 剩下的接口我们经常需要调用别人的(我们会引入别人接口的依赖包, 但是它不包含接口的实现类). 使用RPC框架, 就可以像上面的形式一样, 去调用远程接口, 区别只是注册Bean不再是通过Spring的bean标签, 而是使用RPC框架特有的标签(其实还是由Spring去解析)
 
-```
-1.读取配置文件,获取所有引用rpc服务的声明
-2.从zk中获取这些服务的信息列表缓存到本地,并注册监听器,实时推送改变这个本地缓存
-3.由2中获取的本地缓存,进行ChannelPool的初始化:本地针对每个不同的地址(ip:port),生成一定数量的channel.也就是说与若干提供rpc服务的远程主机提前建立了channel并进行复用
-4.为1中每个引用服务生成一个单例的代理对象,并交给IOC容器管理
-后续:客户端代码里调用rpc服务接口方法时,会由代理对象发送请求和获取结果
-```
+那么你可能会问了: 为什么别人不把接口和实现类都放在一个依赖包, 这样我就不用远程调用了. 这样确实是可行的, 但是在实际业务开发中, 接口的实现经常改变, 如果每次改变实现都要重新发个包让所有调用者都去更换依赖, 那样非常麻烦. 而用了RPC框架, 只是接口提供者自己更新实现即可
+
+**那一次RPC调用过程是怎样的呢?**
+
+![1565874778388](img/simple-rpc-framework/1565874778388.png)
+
+上图就是一次完整的RPC过程, 使用者每调用一次远程接口的方法, RPC框架都会执行1~11步, 对于高性能的RPC框架, 这些步骤很快就能完成. 所以使用者感受不到自己是在调本地接口.
+
+### RPC框架启动流程
+
+RPC框架既与服务端"打交道", 又与"客户端"打交道. 使用它, 你既可以发布自己的服务, 也可以声明调用别人的服务. 服务端和客户端的启动流程都交给Spring来完成, 使用者只用配置相应的标签即可, 就像配置Spring的bean标签一样简单自然.
+
+#### 服务端启动流程
+
+1. 读取配置文件, 获取所有RPC服务声明
+2. 向zk中注册服务
+3. 开启服务代理server
+4. 后续: 接收客户端的请求, 按请求调用实际执行类, 返回结果
+
+#### 客户端启动流程
+
+1. 读取配置文件, 获取所有引用RPC服务的声明
+2. 从zk中获取这些服务的信息列表缓存到本地, 并注册监听器, 实时推送改变这个本地缓存
+3. 由2中获取的本地缓存, 进行ChannelPool的初始化: 本地针对每个不同的地址(ip:port), 生成一定数量的Channel. 也就是说与若干提供rpc服务的远程主机提前建立了Channel并进行复用
+4. 为1中每个引用服务生成一个单例的代理对象, 并交给IOC容器管理
+5. 后续: 客户端代码里调用rpc服务接口方法时, 会由代理对象发送请求和获取结果
 
 ### 序列化/反序列化
 
@@ -330,7 +349,7 @@ public static List<Integer> getIndexListByWeight(List<ProviderRegisterMessage> p
 
 
 
-### spring集成
+### Spring集成
 
 **特性**
 
@@ -391,22 +410,22 @@ simple-reference.xsd内容如下, 头部一些网址需要和spring.schemas中�
 http\://www.simple-rpc.com/schema/simple-reference=spring.RpcReferenceNamespaceHandler
 ```
 
-配置好了定义xsd文件 / schema文件 / hanlder文件后, 配置文件部分就ok了, 可以先看一下自定义标签的效果如下. 标签`simple:reference`的前缀simple是在头部`xmlns:vivo="http://www.simple-rpc.com/schema/simple-reference"`配置的, reference是在xsd定义文件中配置的
+配置好了定义xsd文件 / schema文件 / hanlder文件后, 配置文件部分就ok了, 可以先看一下自定义标签的效果如下. 标签`simple:reference`的前缀simple是在头部`xmlns:simple="http://www.simple-rpc.com/schema/simple-reference"`配置的, reference是在xsd定义文件中配置的
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:vivo="http://www.simple-rpc.com/schema/simple-reference"
+       xmlns:simple="http://www.simple-rpc.com/schema/simple-reference"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.simple-rpc.com/schema/simple-reference http://www.simple-rpc.com/schema/simple-reference.xsd">
 
     <!-- 引入远程服务 -->
-    <vivo:reference id="sayService"
+    <simple:reference id="sayService"
                           interface="test.service.SayService"
                           clusterStrategy="WeightRandom"
                           timeout="3000"/>
-    <vivo:reference id="seeService"
+    <simple:reference id="seeService"
                           interface="test.service.SeeService"
                           clusterStrategy="WeightRandom"
                           timeout="3000"/>
@@ -574,30 +593,11 @@ public class RpcReferenceFactoryBean implements FactoryBean, InitializingBean {
 
 
 
-### 问题
-
-- ClientProxyBeanFactory目前是单例模式, 此时它的fixedThreadPool(static)是所有rpc服务共用的线程池. 如果把这个类变成多例模式,就可以为每个rpc服务单独配置一个线程池. 有这个需要吗?
-- rpc调用时间过长, 由日志监控, 发现大部分时间消耗是在netty进行write时, 升级版本后, 问题解决
-
-
-
-#### 优化项
-
-```
-// 提前加载类
-ClientProxyBeanFactory: 有静态变量fixedThreadPool
-JacksonUtils: 都是staic的方法
-RegisterCenter: 重.在解析标签的初始化过程已经完成加载
-与netty通信相关的类? 编解码器?
-```
-
-
-
 ## 使用指南
 
 使用maven-install命令将maven项目打包到本地仓库
 
-### 配置文件:vivo-rpc.properties
+### 配置文件:simple-rpc.properties
 
 配置文件的名称必须是simple-rpc.properties, 路径必须放在/resources根目录下
 
@@ -642,18 +642,18 @@ clusterStrategy / groupName是可选项配置, 它们默认值都是default, clu
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:vivo="http://www.simple-rpc.com/schema/simple-reference"
+       xmlns:simple="http://www.simple-rpc.com/schema/simple-reference"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://www.simple-rpc.com/schema/simple-reference http://www.simple-rpc.com/schema/simple-reference.xsd">
 
     <!-- 引入远程服务 -->
-    <vivo:reference id="sayService"
+    <simple:reference id="sayService"
                     interface="com.simple.rpc.framework.test.service.SayService"
                     timeout="3000"
                     appName="test"
                     clusterStrategy="default"
                     groupName="default"/>
-    <vivo:reference id="seeService"
+    <simple:reference id="seeService"
                     interface="com.simple.rpc.framework.test.service.SeeService" 						    timeout="3000"/>
 </beans>
 ```
@@ -666,13 +666,13 @@ id / ref / interface / serverPort / timeout, ref标签是该服务的实例执�
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:vivo="http://www.simple-rpc.com/schema/simple-service"
+       xmlns:simple="http://www.simple-rpc.com/schema/simple-service"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://www.simple-rpc.com/schema/simple-service http://www.simple-rpc.com/schema/simple-service.xsd">
 
     <!-- 发布远程服务 -->
     <bean id="sayService" class="com.simple.rpc.framework.test.service.impl.SayServiceImpl"/>
-    <vivo:service id="sayServiceRegister"
+    <simple:service id="sayServiceRegister"
                   ref="sayService"
                   interface="com.simple.rpc.framework.test.service.SayService"
                   appName="test"
@@ -682,7 +682,7 @@ id / ref / interface / serverPort / timeout, ref标签是该服务的实例执�
                   workerThreads="10"/>                  
 
     <bean id="seeService1" class="com.simple.rpc.framework.test.service.impl.SeeServiceImpl"/>
-    <vivo:service id="seeServiceRegister1"
+    <simple:service id="seeServiceRegister1"
                   interface="com.simple.rpc.framework.test.service.SeeService"
                   ref="seeService1"
                   weight="20"
@@ -691,7 +691,7 @@ id / ref / interface / serverPort / timeout, ref标签是该服务的实例执�
                   timeout="600"/>
 
     <bean id="seeService2" class="com.simple.rpc.framework.test.service.impl.SeeServiceImpl2"/>
-    <vivo:service id="seeServiceRegister2"
+    <simple:service id="seeServiceRegister2"
                   interface="com.simple.rpc.framework.test.service.SeeService"
                   ref="seeService2"
                   weight="80"
@@ -704,13 +704,13 @@ id / ref / interface / serverPort / timeout, ref标签是该服务的实例执�
 
 
 
-## 技术要点
+## JUC类的使用
 
-### semaphore
+### Semaphore
 
 信号量 Semaphore 是一个控制访问多个共享资源的计数器，和 CountDownLatch 一样，其本质上是一个“**共享锁**”。Semaphore 通常用于限制可以访问某些资源（物理或逻辑的）的线程数目。本项目在NettyServerHandler用semaphore作为限流工具, NettyServerHandler中有一个静态变量`Map<String, Semaphore> serviceKeySemaphoreMap` , 其中key是rpc调用服务的实现类全限定名, value是一个固定计数量大小的Semaphore对象, 计数量大小由发布服务的标签配置. 每次调用实际服务方法时, 需要acquire一个计数量, 支持超时失败, 执行完方法一定会release. 由此实现了对每个服务的限流控制
 
-**semaphore创建**
+**Semaphore创建**
 
 ```java
 // 根据方法名称定位到具体某一个服务提供者
@@ -730,7 +730,7 @@ if (semaphore == null) {
 }
 ```
 
-**semaphore的使用**
+**Semaphore的使用**
 
 ```java
 ResponseMessage response = null;
