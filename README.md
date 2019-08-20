@@ -1,7 +1,7 @@
 # Simple-RPC
 基本功能完整的RPC框架，供学习使用。如有错误和建议，欢迎交流。
 
-VX: sicor1994
+**Email: jacksu1024@qq.com**
 
 
 
