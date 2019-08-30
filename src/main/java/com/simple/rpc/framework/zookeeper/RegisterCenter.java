@@ -149,7 +149,7 @@ public class RegisterCenter implements RegisterCenter4Provider, RegisterCenter4I
             }
         }
         long times = System.currentTimeMillis() - startTime;
-        LOGGER.info("注册服务耗时{}ms [服务路径:/zookeeper/{}/{}]", times, nameSpace, provider.getServiceImplPath());
+        LOGGER.info("注册服务耗时{}ms [服务路径:/zookeeper/{}/{}]", times, nameSpace, provider.getRefId());
     }
 
     /**

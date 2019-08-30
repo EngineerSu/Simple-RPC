@@ -45,9 +45,9 @@ public class RequestMessage implements Serializable {
      */
     private Integer workerThread;
     /**
-     * 服务接口实现类的全限定名(经过负载均衡后)
+     * 服务接口实现类的bean标签id(经过负载均衡后)
      */
-    private String serviceImplPath;
+    private String refId;
 
     public Integer getWorkerThread() {
         return workerThread;
@@ -97,12 +97,12 @@ public class RequestMessage implements Serializable {
         this.servicePath = servicePath;
     }
 
-    public String getServiceImplPath() {
-        return serviceImplPath;
+    public String getRefId() {
+        return refId;
     }
 
-    public void setServiceImplPath(String serviceImplPath) {
-        this.serviceImplPath = serviceImplPath;
+    public void setRefId(String refId) {
+        this.refId = refId;
     }
 
     public long getTimeout() {
@@ -117,7 +117,7 @@ public class RequestMessage implements Serializable {
     public String toString() {
         return "RequestMessage{" +
                 ", servicePath='" + servicePath + '\'' +
-                ", serviceImplPath='" + serviceImplPath + '\'' +
+                ", serviceImplPath='" + refId + '\'' +
                 ", methodName='" + methodName + '\'' +
                 ", timeout=" + timeout +
                 '}';

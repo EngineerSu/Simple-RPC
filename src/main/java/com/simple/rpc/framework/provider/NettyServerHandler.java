@@ -52,7 +52,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<RequestMessa
         if (ctx.channel().isWritable()) {
             long consumeTimeOut = request.getTimeout();
             // 根据方法名称定位到具体某一个服务提供者
-            String serviceKey = request.getServiceImplPath();
+            String serviceKey = request.getRefId();
             // 进行限流设置
             int workerThread = request.getWorkerThread();
             Semaphore semaphore = SERVICE_KEY_SEMAPHORE_MAP.get(serviceKey);

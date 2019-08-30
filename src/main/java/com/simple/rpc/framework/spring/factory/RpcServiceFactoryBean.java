@@ -46,7 +46,7 @@ public class RpcServiceFactoryBean implements FactoryBean, InitializingBean {
     /**
      * 服务接口实现类对象(通过其获取实现类全限定名)
      */
-    private Object ref;
+    private String ref;
     /**
      * 服务端口
      */
@@ -75,12 +75,13 @@ public class RpcServiceFactoryBean implements FactoryBean, InitializingBean {
      */
     @Override
     public Object getObject() {
-        return null;
+        Object o = ref.getClass();
+        return o;
     }
 
     @Override
     public Class<?> getObjectType() {
-        return null;
+        return Object.class;
     }
 
     /**
@@ -97,7 +98,7 @@ public class RpcServiceFactoryBean implements FactoryBean, InitializingBean {
         ProviderRegisterMessage provider = new ProviderRegisterMessage();
         provider.setAppName(appName);
         provider.setServicePath(servicePath);
-        provider.setServiceImplPath(ref.getClass().getName());
+        provider.setRefId(ref);
         // 获取本机ip地址
         provider.setServerIp(IPHelper.localIp());
         provider.setServerPort(serverPort);
@@ -126,7 +127,7 @@ public class RpcServiceFactoryBean implements FactoryBean, InitializingBean {
         return ref;
     }
 
-    public void setRef(Object ref) {
+    public void setRef(String ref) {
         this.ref = ref;
     }
 

@@ -19,9 +19,9 @@ public class ProviderRegisterMessage implements Serializable {
      */
     private String servicePath;
     /**
-     * 接口实现类的全限定名
+     * 接口实现类的bean标签id
      */
-    private String serviceImplPath;
+    private String refId;
     /**
      * 提供服务的主机地址
      */
@@ -55,12 +55,12 @@ public class ProviderRegisterMessage implements Serializable {
         this.servicePath = servicePath;
     }
 
-    public String getServiceImplPath() {
-        return serviceImplPath;
+    public String getRefId() {
+        return refId;
     }
 
-    public void setServiceImplPath(String serviceImplPath) {
-        this.serviceImplPath = serviceImplPath;
+    public void setRefId(String refId) {
+        this.refId = refId;
     }
 
     public String getServerIp() {

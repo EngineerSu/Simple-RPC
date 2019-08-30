@@ -89,7 +89,7 @@ public class ClientProxyBeanFactory {
                 // 消息ID(具有唯一性)
                 request.setTraceId(UUID.randomUUID().toString());
                 // 缓存服务地址和服务限流参数
-                request.setServiceImplPath(providerRegisterMessage.getServiceImplPath());
+                request.setRefId(providerRegisterMessage.getRefId());
                 request.setWorkerThread(providerRegisterMessage.getWorkerThread());
                 // 服务超时时间
                 request.setTimeout(consumeTimeout);

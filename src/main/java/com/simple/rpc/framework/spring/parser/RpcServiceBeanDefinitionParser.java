@@ -43,7 +43,7 @@ public class RpcServiceBeanDefinitionParser extends AbstractSingleBeanDefinition
             String appName = element.getAttribute("appName");
             bean.addPropertyValue("servicePath", serviceItf);
             // 作用是设置接口实现类全限定名
-            bean.addPropertyReference("ref", ref);
+            bean.addPropertyValue("ref", ref);
             // 解析服务端口,不需要配置本机ip,直接通过工具类获取
             bean.addPropertyValue("serverPort", Integer.parseInt(serverPort));
             bean.addPropertyValue("timeout", Integer.parseInt(timeOut));

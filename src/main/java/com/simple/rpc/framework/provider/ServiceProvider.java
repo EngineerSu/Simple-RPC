@@ -4,6 +4,7 @@ import com.simple.rpc.framework.serialize.message.RequestMessage;
 import com.simple.rpc.framework.serialize.message.ResponseMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,9 +19,11 @@ public class ServiceProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceProvider.class);
 
+    private static final ClassPathXmlApplicationContext CONTEXT = new ClassPathXmlApplicationContext("rpc-service.xml");
+
     public static ResponseMessage execute(RequestMessage request) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
-        // 创建接口实现类对象
-        Object provider = Class.forName(request.getServiceImplPath()).newInstance();
+        // 获取接口实现类对象
+        Object provider = CONTEXT.getBean(request.getRefId());
         // 确定方法参数的Class列表,用于获取Method对象
         Class<?>[] parameterClasses = null;
         String[] parameterTypes = request.getParameterTypes();
