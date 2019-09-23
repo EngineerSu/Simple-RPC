@@ -55,7 +55,7 @@ public class ResponseReceiverHolder {
     }
 
     /**
-     * 为请求创建一个返回结果包装类,并缓存到Mao中
+     * 为请求创建一个返回结果包装类,并缓存到Map中
      */
     public static void initResponseData(String traceId) {
         responseMap.put(traceId, new ResponseReceiver());

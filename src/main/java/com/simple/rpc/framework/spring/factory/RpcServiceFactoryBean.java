@@ -71,12 +71,11 @@ public class RpcServiceFactoryBean implements FactoryBean, InitializingBean {
 
 
     /**
-     * 服务端各服务在初始化时都开启了NettyServer,不要再创建单例对象
+     * 服务实现类对象已在配置文件中声明了bean标签
      */
     @Override
     public Object getObject() {
-        Object o = ref.getClass();
-        return o;
+        return null;
     }
 
     @Override
@@ -115,11 +114,17 @@ public class RpcServiceFactoryBean implements FactoryBean, InitializingBean {
         // 如果缓存中没有这个端口,就开启服务
         if (null == nettyServer) {
             // 使用新的NettyServer开启服务,需要记录在本地缓存
-            nettyServer = new NettyServer();
-            nettyServer.start(serverPort);
-            NETTY_SERVER_MAP.put(serverPort, nettyServer);
-            times = System.currentTimeMillis() - times;
-            LOGGER.info("[{}]端口开启代理服务耗时{}ms", serverPort, times);
+            synchronized (RpcServiceFactoryBean.class) {
+                // 可能会有多个服务对象绑定在同一端口，保证它们只能创建一个nettyServer
+                if (null == NETTY_SERVER_MAP.get(serverPort)) {
+                    // 双重校验
+                    nettyServer = new NettyServer();
+                    nettyServer.start(serverPort);
+                    NETTY_SERVER_MAP.put(serverPort, nettyServer);
+                    times = System.currentTimeMillis() - times;
+                    LOGGER.info("[{}]端口开启代理服务耗时{}ms", serverPort, times);
+                }
+            }
         }
     }
 

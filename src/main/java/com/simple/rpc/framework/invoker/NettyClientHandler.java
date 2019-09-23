@@ -31,7 +31,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<ResponseMess
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, ResponseMessage response) throws Exception {
-        // Netty异步返获取结果后的操作:存入结果阻塞队列
+        // Netty异步获取结果后的操作:存入结果阻塞队列
         ResponseReceiverHolder.putResultValue(response);
         LOGGER.info("客户端接收返回结果:[content:{} id:{}]", response, response.getTraceId());
     }

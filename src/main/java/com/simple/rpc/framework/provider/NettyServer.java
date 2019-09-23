@@ -37,40 +37,38 @@ public class NettyServer {
     private Channel channel;
 
     /**
-     * 启动Netty服务
+     * 启动Netty服务：同步方法，因为本机中可能有多个服务绑定在同一个端口上，会并发创建server并start
      */
     public void start(final int port) {
-        synchronized (NettyServer.class) {
-            if (bossGroup != null || workerGroup != null) {
-                return;
-            }
-            bossGroup = new NioEventLoopGroup();
-            workerGroup = new NioEventLoopGroup();
-            ServerBootstrap serverBootstrap = new ServerBootstrap();
-            String serialize = PropertyConfigHelper.getServerSerializer();
-            serverBootstrap
-                    .group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.SO_BACKLOG, 1024)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true)
-                    .childOption(ChannelOption.TCP_NODELAY, true)
-                    .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                            // 注册接收消息解码器
-                            ch.pipeline().addLast(new NettyDecoderHandler(RequestMessage.class));
-                            // 注册返回消息编码器
-                            ch.pipeline().addLast(new NettyEncoderHandler(serialize));
-                            // 注册服务端业务逻辑处理器
-                            ch.pipeline().addLast(new NettyServerHandler());
-                        }
-                    });
-            try {
-                channel = serverBootstrap.bind(port).sync().channel();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+        if (bossGroup != null || workerGroup != null) {
+            return;
+        }
+        bossGroup = new NioEventLoopGroup();
+        workerGroup = new NioEventLoopGroup();
+        ServerBootstrap serverBootstrap = new ServerBootstrap();
+        String serialize = PropertyConfigHelper.getServerSerializer();
+        serverBootstrap
+                .group(bossGroup, workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .option(ChannelOption.SO_BACKLOG, 1024)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childOption(ChannelOption.TCP_NODELAY, true)
+                .handler(new LoggingHandler(LogLevel.INFO))
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        // 注册接收消息解码器
+                        ch.pipeline().addLast(new NettyDecoderHandler(RequestMessage.class));
+                        // 注册返回消息编码器
+                        ch.pipeline().addLast(new NettyEncoderHandler(serialize));
+                        // 注册服务端业务逻辑处理器
+                        ch.pipeline().addLast(new NettyServerHandler());
+                    }
+                });
+        try {
+            channel = serverBootstrap.bind(port).sync().channel();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 

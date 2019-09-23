@@ -21,8 +21,8 @@ public class ServiceProvider {
 
     private static final ClassPathXmlApplicationContext CONTEXT = new ClassPathXmlApplicationContext("rpc-service.xml");
 
-    public static ResponseMessage execute(RequestMessage request) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
-        // 获取接口实现类对象
+    public static ResponseMessage execute(RequestMessage request) throws ClassNotFoundException {
+        // 从IOC容器中获取接口实现类对象
         Object provider = CONTEXT.getBean(request.getRefId());
         // 确定方法参数的Class列表,用于获取Method对象
         Class<?>[] parameterClasses = null;

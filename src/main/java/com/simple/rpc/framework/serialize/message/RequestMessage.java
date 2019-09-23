@@ -33,7 +33,7 @@ public class RequestMessage implements Serializable {
     /**
      * 待执行方法的参数值
      */
-    Object[] parameters;
+    private Object[] parameters;
     /**
      * 待执行方法参数全限定名,用于反射时寻找method
      */

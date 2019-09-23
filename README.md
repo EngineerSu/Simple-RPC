@@ -5,15 +5,13 @@
 
 
 
-## 食用说明
+## 简介
 
-本Simple-RPC项目框架主要参考《架构探险：从零开始写分布式服务框架》的项目源码，自己做了很多自定义化的修改、改进和增强。
-
-Simple-RPC并没有达到商用的标准，但是作为一个学习参考项目，它是非常合适的。麻雀虽小，五脏俱全，Simple-RPC拥有RPC框架的所有核心功能（可能是乞丐版），会涉及到**Spring、Neety、Zookeeper、JUC的某些类、序列化协议、负载均衡算法和简单并发编程**等技能点。下面对Simple-RPC的特点进行简要介绍。
+Simple-RPC并没有达到商用的标准，但是作为一个学习参考项目，它是非常合适的。它拥有RPC框架的核心功能，会涉及到**Spring、Neety、Zookeeper、JUC的某些类、序列化协议、负载均衡算法和简单并发编程**等技能点。下面是Simple-RPC的一些特性
 
 ### Spring集成
 
-- 本项目集成Spring，支持“一键启动”
+- 集成Spring，支持“一键启动”
 - 将项目打包到本地仓库，即可直接当RPC框架使用
 
 ### 配置文件
@@ -29,8 +27,8 @@ Simple-RPC并没有达到商用的标准，但是作为一个学习参考项目�
 
 ### 负载均衡策略
 
-- 提供了 Random / WeightRandom / Polling / WeightPolling / Hash 5种均衡算法的简单实现
-- 支持组合策略配置：在rpc-reference.xml中引用服务时，各服务可配置不同的负载均衡策略
+- 提供了 Random / WeightRandom / Polling / WeightPolling / Hash 5种负载均衡算法
+- 支持组合策略配置：在 rpc-reference.xml 中引用服务时，各服务可配置不同的负载均衡策略
 
 ### 注册中心
 
@@ -42,12 +40,9 @@ Simple-RPC并没有达到商用的标准，但是作为一个学习参考项目�
 - 支持Timeout设计
 - 初始化时，自动为不同的服务地址生成ChannelPool，提高连接速度
 - 发布服务时可以自定义该服务的限流信号量大小，提升系统稳定性
-- 客户端调用RPC服务使用统一线程池，线程池大小可配置
+- 客户端调用RPC服务使用统一线程池(线程池大小可配置)，隔离RPC服务风险
 - 使用阻塞队列同步等待Netty的异步返回结果
-
-### 改进
-
-- 提供了服务治理的接口功能，但是服务治理模块还没有实现，复杂的调用链分析没有做
+- 提供了简单服务治理的相关接口
 
 
 
@@ -59,7 +54,7 @@ Simple-RPC并没有达到商用的标准，但是作为一个学习参考项目�
 
 1. 下载[zookeeper](https://note.youdao.com/ynoteshare1/index.html?id=65dd9de0a5ad1a2b2858d4295d523e22&type=note)，参考[这里](https://www.jianshu.com/p/fb190c6d9768)在你的windows上安装并运行zookeeper，注意使用zookeeper时不要关闭CMD窗口
 
-2. clone本项目到本地，使用IDEA打开(没试过Eclipse导入本项目，不建议使用)，配置maven和本地仓库，等待依赖自动导入完成（不会使用maven？Google/Baidu可以帮助你）
+2. clone本项目到本地，使用IDEA打开(没试过Eclipse导入本项目，不建议使用)，配置maven和本地仓库，等待依赖自动导入完成
 
 3. 找到`com.simple.rpc.framework.test.MainServer`，运行它的main方法，可以看到控制台打印服务端的启动日志；再找到`com.simple.rpc.framework.test.MainClient`，同样运行它的main方法，可以看到控制台打印客户端的运行日志。
 
@@ -69,7 +64,7 @@ Simple-RPC并没有达到商用的标准，但是作为一个学习参考项目�
 
     MainClient中提供了简单的调用RPC服务测试用例，直接RUN即可。你也可以设置自己的接口和实现类，但是注意需要在rpc-service.xml和rpc-reference.xml中发布和引用你创建的服务。
 
-### 再来自定义RUN
+### 自定义RUN
 
 本项目自定义的配置文件有：simple-rpc.properties / rpc-service.xml / rpc-reference.xml
 
@@ -84,10 +79,10 @@ Simple-RPC并没有达到商用的标准，但是作为一个学习参考项目�
 ```properties
 # 注册中心ZK地址,必须配置,没有默认值
 simple.rpc.zookeeper.address=localhost:2181
-# session超时时间,默认500
-simple.rpc.zookeeper.session.timeout=3000
-# 连接超时时间,默认500
-simple.rpc.zookeeper.connection.timeout=3000
+# session超时时间,默认1000ms
+simple.rpc.zookeeper.session.timeout=1000
+# 连接超时时间,默认1000ms
+simple.rpc.zookeeper.connection.timeout=1000
 # 负载均衡默认策略可选值: Random / WeightRandom / Polling / WeightPolling / Hash. 如果配置错误,则使用Random策略
 simple.rpc.client.clusterStrategy.default=WeightRandom
 # 客户端对每个主机的初始化Channel数量,默认:10
@@ -152,7 +147,7 @@ simple.rpc.client.serializer=Default
 - timeout：服务超时时间
 - groupName：应用所属分组名称， 本项目未用到。如果要在ZK中设置更复杂的注册路径，可以使用
 
-### 还可以依赖RUN
+### 依赖RUN
 
 因为这是一个RPC框架，它当然是可以作为jar包被其他项目依赖使用的。
 
@@ -166,7 +161,7 @@ simple.rpc.client.serializer=Default
 </dependency>
 ```
 
-作为依赖在新项目中使用时，必须提供配置文件：simple-rpc.properties / rpc-service.xml / rpc-reference.xml， 且它们都要放在 /resource 根目录下，然后创建自己的接口和实现类，并按要求码配置标签即可使用。（和Dubbo的使用要求是类似的）
+作为依赖在新项目中使用时，必须提供配置文件：simple-rpc.properties / rpc-service.xml / rpc-reference.xml， 且它们都要放在 /resource 根目录下，然后创建自己的接口和实现类，并按要求提供配置标签即可使用（和Dubbo的使用要求是类似的）
 
 你也可以选择偷懒：直接将原项目 com.simple.rpc.framework.test 包中内容 和 /resources 下的配置文件都copy到新项目中，即可测试使用。
 
@@ -176,7 +171,7 @@ simple.rpc.client.serializer=Default
 
 这里教你如何从零开发Simple-RPC框架（待补充整理）
 
-(开发过程中，做了一些笔记，暂时放在[这里](./doc/simple-rpc-framework.md)作为参考，注意其中可能有很多地方和实际项目有出入，因为项目后面又改动了很多，没有及时更新文档，有时间再整理一下)
+(开发过程中，做了一些笔记，暂时放在[这里](./doc/simple-rpc-framework.md)作为参考，其中可能有一些地方和实际项目有出入，因为项目后面又改动了很多，没有及时更新文档，有时间再整理一下)
 
 
 

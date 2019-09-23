@@ -52,6 +52,7 @@ public class ResponseMessage implements Serializable {
     @Override
     public String toString() {
         return "ResponseMessage{" +
+                "traceId='" + traceId + '\'' +
                 ", returnValue=" + returnValue +
                 ", timeout=" + timeout +
                 '}';
