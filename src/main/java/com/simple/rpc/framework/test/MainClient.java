@@ -38,7 +38,7 @@ public class MainClient {
         testMultiService();
         multiService.sayHi();
         // 客户端退出
-        System.exit(0);
+//        System.exit(0);
     }
 
 
