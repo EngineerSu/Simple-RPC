@@ -18,7 +18,7 @@
         <com.github.sgroschupf.zkclient.version>0.1</com.github.sgroschupf.zkclient.version>
         <com.google.guava.guava.version>19.0</com.google.guava.guava.version>
         <org.apache.commons.commons-lang3.version>3.3.1</org.apache.commons.commons-lang3.version>
-        <commons-collections.commons-collections.version>3.2.1</commons-collections.commons-collections.version>
+        <commons-collections.commons-collections.version>3.2.2</commons-collections.commons-collections.version>
         <org.springframework.spring-context.version>4.3.11.RELEASE</org.springframework.spring-context.version>
     </properties>
 
