@@ -14,7 +14,7 @@
         <org.slf4j.slf4j-log4j12.version>1.7.2</org.slf4j.slf4j-log4j12.version>
         <protostuff.version>1.0.9</protostuff.version>
         <com.caucho.hessian.version>4.0.38</com.caucho.hessian.version>
-        <org.apache.zookeeper.zookeeper.version>3.4.8</org.apache.zookeeper.zookeeper.version>
+        <org.apache.zookeeper.zookeeper.version>3.4.14</org.apache.zookeeper.zookeeper.version>
         <com.github.sgroschupf.zkclient.version>0.1</com.github.sgroschupf.zkclient.version>
         <com.google.guava.guava.version>19.0</com.google.guava.guava.version>
         <org.apache.commons.commons-lang3.version>3.3.1</org.apache.commons.commons-lang3.version>
